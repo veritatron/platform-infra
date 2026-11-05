@@ -14,6 +14,7 @@ ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC05rqL7cetmUsLDbnSRHrcsxw
 gitops_repo_url = "https://github.com/veritatron/platform-gitops.git"
 gitops_revision = "main"
 
+r2_jurisdiction      = "eu"
 state_bucket         = "veritatron-state"
 etcd_snapshot_bucket = "veritatron-etcd-snapshot"
 

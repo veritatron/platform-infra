@@ -6,7 +6,7 @@ locals {
   }
 
   # R2 accepts only the region "auto".
-  object_storage_host     = "${var.r2_account_id}.r2.cloudflarestorage.com"
+  object_storage_host     = join(".", compact([var.r2_account_id, var.r2_jurisdiction == "default" ? "" : var.r2_jurisdiction, "r2.cloudflarestorage.com"]))
   object_storage_endpoint = "https://${local.object_storage_host}"
   object_storage_region   = "auto"
   state_key               = "platform-infra/${var.environment}/terraform.tfstate"

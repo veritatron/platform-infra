@@ -23,7 +23,7 @@ State und Snapshots liegen in **Cloudflare R2**, in zwei getrennten Buckets:
 
 Technische Eckpunkte:
 
-- Endpoint `https://<account-id>.r2.cloudflarestorage.com`, Region `auto`, Path-Style-Adressierung.
+- Beide Buckets liegen in der **EU-Jurisdiktion**. Endpoint `https://<account-id>.eu.r2.cloudflarestorage.com`, gesteuert über `r2_jurisdiction`; Region `auto`, Path-Style-Adressierung. Über den Standard-Endpoint ohne `.eu` antwortet R2 für diese Buckets mit 403.
 - Locking über `use_lockfile`. R2 unterstützt die dafür nötigen bedingten Schreibvorgänge (`If-None-Match`) laut Cloudflare-Doku.
 - Die Buckets werden einmalig von Hand angelegt, weil OpenTofu den Bucket für seinen eigenen State nicht selbst anlegen kann.
 
