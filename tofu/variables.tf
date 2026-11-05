@@ -102,6 +102,16 @@ variable "r2_account_id" {
   }
 }
 
+variable "r2_jurisdiction" {
+  type        = string
+  description = "R2 jurisdiction of both buckets. Buckets in a jurisdiction are only reachable through its own endpoint, e.g. <account-id>.eu.r2.cloudflarestorage.com; \"default\" uses <account-id>.r2.cloudflarestorage.com."
+
+  validation {
+    condition     = contains(["default", "eu", "fedramp"], var.r2_jurisdiction)
+    error_message = "r2_jurisdiction must be one of default, eu or fedramp."
+  }
+}
+
 variable "state_bucket" {
   type        = string
   description = "Bucket that holds the OpenTofu state."
