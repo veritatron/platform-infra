@@ -1,0 +1,37 @@
+# OpenTofu
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.secret.tfvars
+secrets.auto.tfvars
+
+# Kubernetes access
+kubeconfig*
+*.kubeconfig
+.kube/
+
+# Local environment and keys
+.env
+.env.*
+.envrc
+*.pem
+*.key
+*.age
+
+*.secret.yaml
+
+# Editors and OS
+.vs/
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

@@ -1,0 +1,19 @@
+# Rendered with templatefile() in tofu/locals.tf before it is written by cloud-init.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: "${gitops_repo_url}"
+    targetRevision: "${gitops_revision}"
+    path: appsets
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

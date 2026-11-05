@@ -1,0 +1,23 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+
+# Files are base64-encoded so their content cannot break the YAML structure.
+write_files:
+  - path: ${k3s_config_path}
+    permissions: "0600"
+    encoding: b64
+    content: ${k3s_config}
+  - path: ${k3s_manifests_dir}/argocd.yaml
+    permissions: "0600"
+    encoding: b64
+    content: ${argocd_manifest}
+  - path: ${k3s_manifests_dir}/root-app.yaml
+    permissions: "0600"
+    encoding: b64
+    content: ${root_app_manifest}
+
+# The install script is taken from the same tag as the k3s release.
+runcmd:
+  - curl -sfL --retry 5 -o /root/k3s-install.sh '${k3s_install_script}'
+  - INSTALL_K3S_VERSION='${k3s_version}' sh /root/k3s-install.sh

@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tofu fmt:*)",
+      "Bash(tofu validate:*)",
+      "Bash(tofu -chdir=tofu fmt:*)",
+      "Bash(tofu -chdir=tofu validate:*)",
+      "Bash(kubeconform:*)",
+      "Bash(make plan)"
+    ],
+    "deny": [
+      "Bash(tofu apply:*)",
+      "Bash(tofu destroy:*)",
+      "Bash(tofu -chdir=tofu apply:*)",
+      "Bash(tofu -chdir=tofu destroy:*)",
+      "Bash(tofu state rm:*)",
+      "Bash(tofu import:*)",
+      "Bash(make apply:*)",
+      "Bash(make destroy:*)",
+      "Bash(kubectl apply:*)",
+      "Bash(kubectl delete:*)",
+      "Bash(helm install:*)",
+      "Bash(helm upgrade:*)",
+      "Read(**/*.tfstate)",
+      "Read(**/*.tfstate.*)",
+      "Read(**/*.secret.*)",
+      "Read(**/secrets.auto.tfvars)",
+      "Read(**/kubeconfig*)",
+      "Read(**/*.kubeconfig)",
+      "Read(**/.kube/**)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)"
+    ]
+  }
+}
