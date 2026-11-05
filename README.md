@@ -1,5 +1,8 @@
 # platform-infra
 
+[![checks](https://github.com/veritatron/platform-infra/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/veritatron/platform-infra/actions/workflows/checks.yml?query=branch%3Amain)
+[![tofu](https://github.com/veritatron/platform-infra/actions/workflows/tofu.yml/badge.svg?branch=main)](https://github.com/veritatron/platform-infra/actions/workflows/tofu.yml?query=branch%3Amain)
+
 Infrastruktur-Grundlage für alle Webseiten und Anwendungen: ein k3s-Single-Node-Cluster in der Hetzner Cloud, provisioniert mit OpenTofu und per cloud-init an Argo CD übergeben. Ab dem ersten Start verwaltet [`platform-gitops`](#abgrenzung-zu-platform-gitops) alles, was im Cluster läuft.
 
 ```
@@ -58,6 +61,8 @@ Die Hintergründe zu diesen Entscheidungen stehen in [`CLAUDE.md`](CLAUDE.md#ent
 ├── .github/workflows/
 │   ├── checks.yml                  fmt, validate, kubeconform
 │   └── tofu.yml                    Plan im PR, Apply nach Freigabe
+├── scripts/
+│   └── verify-k3s-pin.sh           prüft die Pins des k3s-Installationsskripts
 ├── docs/{adr,runbooks}/
 └── Makefile
 ```
@@ -196,6 +201,16 @@ State und gespeicherte Pläne sind verschlüsselt (`enforced = true`). Ein unver
 
 Ein freigegebener Plan, der inzwischen veraltet ist, wird von OpenTofu abgelehnt. Das Plan-Artefakt wird nach sieben Tagen gelöscht. Danach den Workflow neu starten.
 
+**Status:** Die Badges oben zeigen das Ergebnis des jeweils letzten Laufs auf `main`. Ein Klick führt zum Lauf.
+
+| Badge | Bedeutung |
+|---|---|
+| `checks` grün | Code auf `main` ist formatiert und valide, die Bootstrap-Manifeste passen zum Schema |
+| `tofu` grün | der letzte `tofu`-Lauf auf `main` hat geplant und, falls es Änderungen gab, angewendet |
+| `tofu` rot | Plan oder Apply fehlgeschlagen oder Freigabe abgelehnt; Details im Lauf |
+
+`tofu` läuft auf `main` nur bei Änderungen in `tofu/`, `bootstrap/` oder am Workflow selbst. Das Badge zeigt also den letzten Lauf mit solchen Änderungen. Es sagt nichts darüber, ob die Infrastruktur heute noch dem Code entspricht. Abweichungen, etwa durch eine Änderung in der Hetzner Console, zeigt erst ein neuer Lauf: *Actions → tofu → Run workflow*. Solange eine Freigabe aussteht, zeigt das Badge noch das Ergebnis des vorherigen abgeschlossenen Laufs; nachgeprüft ist dieses Verhalten von GitHub nicht.
+
 **Lokal**, etwa im Notfall oder ohne GitHub:
 
 ```sh
@@ -214,15 +229,16 @@ Commits folgen [Conventional Commits](https://www.conventionalcommits.org/): `fe
 | `make fmt` | formatiert alle `.tf`- und `.tfvars`-Dateien |
 | `make validate` | `tofu init -backend=false` und `tofu validate`; ohne Secrets |
 | `make lint` | kubeconform für `bootstrap/` |
-| `make check` | `validate`, `lint` und `fmt -check`; entspricht dem CI-Check |
+| `make verify-k3s` | prüft, ob Commit und Prüfsumme des Installationsskripts zu `k3s_version` passen; braucht Netzzugang |
+| `make check` | `validate`, `lint`, `verify-k3s` und `fmt -check`; entspricht dem CI-Check |
 | `make plan` | Plan nach `tofu/<env>.tfplan` |
 | `make apply` | wendet den gespeicherten Plan an |
 | `make kubeconfig` | holt die kubeconfig per SSH nach `~/.kube/platform-<env>.yaml` |
 
-kubeconform ohne lokale Installation:
+kubeconform ohne lokale Installation, aus dem gepinnten Image (`KUBECONFORM_IMAGE` im `Makefile`, dieselbe Quelle wie in CI):
 
 ```sh
-make lint KUBECONFORM="docker run --rm -v $PWD:/work -w /work ghcr.io/yannh/kubeconform:v0.8.0"
+make lint KUBECONFORM_DOCKER=1
 ```
 
 ## Schutzmechanismen
@@ -248,10 +264,15 @@ Alle Versionen sind gepinnt und werden vor einer Änderung in der jeweiligen Que
 | OpenTofu | `tofu/versions.tf`, `.github/workflows/*.yml` | [GitHub-Releases](https://github.com/opentofu/opentofu/releases) |
 | hcloud-Provider | `tofu/versions.tf`, `.terraform.lock.hcl` | [search.opentofu.org](https://search.opentofu.org/provider/hetznercloud/hcloud) |
 | k3s | `k3s_version` in `prod.tfvars` | [GitHub-Releases](https://github.com/k3s-io/k3s/releases) |
+| k3s-Installationsskript | `k3s_install_script_commit` und `k3s_install_script_sha256` in `prod.tfvars`; `make verify-k3s` prüft, dass sie zu `k3s_version` passen | Commit des Release-Tags, Prüfsumme von `install.sh` an diesem Commit |
+| kubeconform-Image | `KUBECONFORM_IMAGE` im `Makefile`, auf Digest | [GitHub-Releases](https://github.com/yannh/kubeconform/releases) |
+| CRD-Schemas für kubeconform | `CRD_CATALOG` im `Makefile`, auf Commit-SHA | [datreeio/CRDs-catalog](https://github.com/datreeio/CRDs-catalog) |
 | Argo-CD-Chart | `bootstrap/argocd.yaml` | [ArtifactHub](https://artifacthub.io/packages/helm/argo/argo-cd) |
 | GitHub Actions | `.github/workflows/*.yml`, auf Commit-SHA | jeweiliges Repository |
 
-`k3s_version` und die Chart-Version wirken nur beim ersten Start eines Servers. Ein Upgrade im laufenden Betrieb erfolgt für k3s über den System Upgrade Controller und für Argo CD über dessen Selbstverwaltung, beides in `platform-gitops`.
+`k3s_version`, das Installationsskript und die Chart-Version wirken nur beim ersten Start eines Servers. Ein Upgrade im laufenden Betrieb erfolgt für k3s über den System Upgrade Controller und für Argo CD über dessen Selbstverwaltung, beides in `platform-gitops`.
+
+Diese Werte bei laufendem Server **nicht** ändern: Sie stecken in `user_data`, jede Änderung würde den Server ersetzen, und `prevent_destroy` lässt den Plan deshalb scheitern. Angepasst werden sie nur unmittelbar vor einem bewusst neu angelegten Server, alle drei k3s-Werte gemeinsam. `make verify-k3s` prüft dann, ob Commit und Prüfsumme zur Version passen.
 
 ## Bekannte Einschränkungen
 

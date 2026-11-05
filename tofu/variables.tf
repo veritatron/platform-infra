@@ -25,7 +25,7 @@ variable "image" {
 
 variable "k3s_version" {
   type        = string
-  description = "Pinned k3s release, e.g. v1.37.2+k3s1."
+  description = "Pinned k3s release, e.g. v1.37.2+k3s1. Only used when a server is created; changing it replaces the server, so update it together with k3s_install_script_commit and k3s_install_script_sha256 only before creating a new server."
 
   validation {
     condition     = can(regex("^v[0-9]+\\.[0-9]+\\.[0-9]+\\+k3s[0-9]+$", var.k3s_version))
@@ -33,11 +33,30 @@ variable "k3s_version" {
   }
 }
 
-# Not a secret, but private: the repository is public. Set via TF_VAR_admin_ips.
+variable "k3s_install_script_commit" {
+  type        = string
+  description = "Commit SHA of the k3s repository the install script is downloaded from; the commit of the k3s_version tag."
+
+  validation {
+    condition     = can(regex("^[0-9a-f]{40}$", var.k3s_install_script_commit))
+    error_message = "k3s_install_script_commit must be a full 40-character commit SHA."
+  }
+}
+
+variable "k3s_install_script_sha256" {
+  type        = string
+  description = "SHA-256 checksum of install.sh at k3s_install_script_commit."
+
+  validation {
+    condition     = can(regex("^[0-9a-f]{64}$", var.k3s_install_script_sha256))
+    error_message = "k3s_install_script_sha256 must be a 64-character SHA-256 checksum."
+  }
+}
+
 variable "admin_ips" {
   type        = list(string)
   sensitive   = true
-  description = "CIDRs allowed to reach SSH and the Kubernetes API, e.g. [\"198.51.100.7/32\"]."
+  description = "CIDRs allowed to reach SSH and the Kubernetes API, e.g. [\"198.51.100.7/32\"]. Private in a public repository, so set via TF_VAR_admin_ips, never in a .tfvars file."
 
   validation {
     condition = length(var.admin_ips) > 0 && alltrue([
@@ -73,12 +92,9 @@ variable "gitops_revision" {
   description = "Git revision (branch, tag or commit) of platform-gitops that Argo CD tracks."
 }
 
-# Not a secret, but private: the repository is public. Set via TF_VAR_r2_account_id.
-# It cannot be sensitive because the backend rejects sensitive values; it only
-# reaches the plan inside user_data, which is sensitive as a whole.
 variable "r2_account_id" {
   type        = string
-  description = "Cloudflare account ID that owns the R2 buckets for state and etcd snapshots."
+  description = "Cloudflare account ID that owns the R2 buckets for state and etcd snapshots. Private in a public repository, so set via TF_VAR_r2_account_id. Not sensitive because the backend rejects sensitive values."
 
   validation {
     condition     = can(regex("^[0-9a-f]{32}$", var.r2_account_id))

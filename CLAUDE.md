@@ -31,6 +31,7 @@ platform-infra/
 ├── docs/
 │   ├── runbooks/                  Anleitungen, z. B. Restore aus etcd-Snapshot, Node hinzufügen
 │   └── adr/                       Architekturentscheidungen
+├── scripts/                       Hilfsskripte, z. B. Prüfung der k3s-Pins
 ├── .github/workflows/             checks (fmt, validate, kubeconform), tofu (Plan im PR, Apply nach Freigabe)
 ├── Makefile                       make plan, make apply, make kubeconfig
 └── README.md

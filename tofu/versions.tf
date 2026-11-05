@@ -8,8 +8,6 @@ terraform {
     }
   }
 
-  # Variables and locals are allowed here through OpenTofu's early evaluation,
-  # so `tofu init` needs the same -var-file as `tofu plan`.
   backend "s3" {
     bucket = var.state_bucket
     key    = local.state_key

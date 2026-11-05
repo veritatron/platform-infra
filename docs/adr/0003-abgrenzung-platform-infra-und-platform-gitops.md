@@ -56,7 +56,7 @@ DNS-Einträge werden erst gebraucht, wenn eine Anwendung unter einem Namen errei
 **Negativ**
 
 - Für eine kurze Zeit verwalten zwei Mechanismen Argo CD: der k3s-`HelmChart` und die Selbstverwaltung. Beide müssen dasselbe Release (`argocd` im Namespace `argocd`) verwenden, bis der `HelmChart` stillgelegt ist.
-- Die k3s-Version in `prod.tfvars` und die tatsächlich laufende Version können auseinanderlaufen, sobald der System Upgrade Controller ein Upgrade gemacht hat. Vor dem Anlegen eines neuen Servers muss `k3s_version` deshalb auf den aktuellen Stand gebracht werden.
+- Die k3s-Version in `prod.tfvars` und die tatsächlich laufende Version können auseinanderlaufen, sobald der System Upgrade Controller ein Upgrade gemacht hat. Bei laufendem Server bleiben die Werte bewusst stehen, weil jede Änderung an `user_data` den Server ersetzen würde. Erst unmittelbar vor dem Anlegen eines neuen Servers werden `k3s_version`, `k3s_install_script_commit` und `k3s_install_script_sha256` gemeinsam auf den aktuellen Stand gebracht. Sonst startet der neue Server mit einer älteren Version als der Snapshot, der darauf wiederhergestellt wird.
 - Der Zugriff auf den DNS-Anbieter liegt im Cluster, als Secret für external-dns und cert-manager.
 
 ## Betrachtete Alternativen

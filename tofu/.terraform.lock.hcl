@@ -1,6 +1,3 @@
-# This file is maintained automatically by "tofu init".
-# Manual edits may be lost in future updates.
-
 provider "registry.opentofu.org/hetznercloud/hcloud" {
   version     = "1.70.2"
   constraints = "~> 1.70"

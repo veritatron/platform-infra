@@ -2,7 +2,6 @@
 package_update: true
 package_upgrade: true
 
-# Files are base64-encoded so their content cannot break the YAML structure.
 write_files:
   - path: ${k3s_config_path}
     permissions: "0600"
@@ -17,7 +16,11 @@ write_files:
     encoding: b64
     content: ${root_app_manifest}
 
-# The install script is taken from the same tag as the k3s release.
 runcmd:
-  - curl -sfL --retry 5 -o /root/k3s-install.sh '${k3s_install_script}'
-  - INSTALL_K3S_VERSION='${k3s_version}' sh /root/k3s-install.sh
+  - |
+    (
+      set -eu
+      curl -sfL --retry 10 --retry-all-errors --retry-delay 5 -o /root/k3s-install.sh '${k3s_install_script}'
+      echo '${k3s_install_script_sha256}  /root/k3s-install.sh' | sha256sum -c -
+      INSTALL_K3S_VERSION='${k3s_version}' sh /root/k3s-install.sh
+    )

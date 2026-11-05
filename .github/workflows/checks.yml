@@ -12,8 +12,6 @@ jobs:
   static:
     name: fmt, validate, kubeconform
     runs-on: ubuntu-24.04
-    env:
-      KUBECONFORM: docker run --rm -v ${{ github.workspace }}:/work -w /work ghcr.io/yannh/kubeconform:v0.8.0
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -24,4 +22,4 @@ jobs:
           tofu_version: 1.12.12
           tofu_wrapper: false
 
-      - run: make check
+      - run: make check KUBECONFORM_DOCKER=1

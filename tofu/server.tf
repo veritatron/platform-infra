@@ -17,8 +17,6 @@ resource "hcloud_primary_ip" "control_plane" {
   }
 }
 
-# Changing user_data, ssh_keys or image replaces the server. prevent_destroy
-# makes such a plan fail instead, so a replacement has to be a deliberate step.
 resource "hcloud_server" "control_plane" {
   name               = var.server_name
   server_type        = var.server_type
