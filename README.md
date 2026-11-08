@@ -71,7 +71,7 @@ Die Hintergründe zu diesen Entscheidungen stehen in [`CLAUDE.md`](CLAUDE.md#ent
 
 | Werkzeug | Version | Wofür |
 |---|---|---|
-| [OpenTofu](https://opentofu.org/docs/intro/install/) | 1.12.x (CI: 1.12.12) | lokal planen, Notfall-Apply, `make kubeconfig` |
+| [OpenTofu](https://opentofu.org/docs/intro/install/) | 1.13.x (CI: 1.13.9) | lokal planen, Notfall-Apply, `make kubeconfig` |
 | GNU `make` | beliebig | Makefile-Targets |
 | [kubectl](https://kubernetes.io/docs/tasks/tools/) | passend zu k3s | Zugriff auf den Cluster |
 | [kubeconform](https://github.com/yannh/kubeconform) | 0.8.0 | lokal `make lint`; alternativ per Docker, siehe [Make-Targets](#make-targets) |
