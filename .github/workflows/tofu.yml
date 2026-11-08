@@ -24,7 +24,7 @@ permissions:
   contents: read
 
 env:
-  TOFU_VERSION: 1.12.12
+  TOFU_VERSION: 1.13.9
   TF_IN_AUTOMATION: "true"
   TF_INPUT: "false"
   VAR_FILE: environments/prod.tfvars
